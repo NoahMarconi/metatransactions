@@ -40,7 +40,7 @@ contract('MetaTxToken', function ([_, owner, recipient, anotherAccount]) {
             // Note (ganache auto-applies "Ethereum Signed Message" prefix).
             const signature = await web3.eth.sign(recipient, toSign);
             
-            await this.token.metapprove(recipient, owner, approveAmount, nonce, signature);
+            await this.token.metapprove(recipient, owner, approveAmount, nonce, signature, { from: _ });
 
             const newAllowance = await this.token.allowance.call(recipient, owner);
             newAllowance.toNumber().should.be.equal(approveAmount);

@@ -95,9 +95,9 @@ contract MetaTxToken is ERC20Mintable, ERC20Detailed {
     return _nonces[sender];
   }
 
-  function verifyApproval(address sender, bytes32 payload, bytes signature) returns (address) {
+  function verifyApproval(address sender, bytes32 payload, bytes signature) returns (bool) {
     address recoveredAddress = ECDSA.recover(ECDSA.toEthSignedMessageHash(payload), signature);
-    return recoveredAddress; //== sender;
+    return recoveredAddress == sender;
   }
 
   function metapprove(
@@ -114,7 +114,7 @@ contract MetaTxToken is ERC20Mintable, ERC20Detailed {
     
     // Verify signature.
     bytes32 payload = payloadToSign(sender, spender, value, nonce);
-    require(verifyApproval(sender, payload, signature) == sender);
+    require(verifyApproval(sender, payload, signature));
 
     // Standard approve.
     require(spender != address(0));
