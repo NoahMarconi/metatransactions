@@ -3,6 +3,12 @@
   "version": "0.0.1",
   "description": "Meta Transaction Implementations",
   "main": "truffle-config.js",
+  "scripts": {
+    "migrate": "node_modules/truffle/build/cli.bundled.js migrate",
+    "test": "node_modules/truffle/build/cli.bundled.js test",
+    "clean": "rm -rf build/",
+    "ganache-cli": "node_modules/ganache-cli/cli.js"
+  },
   "repository": "https://github.com/NoahMarconi/metatransactions",
   "author": "Noah Marconi <noah.marconi@gmail.com>",
   "license": "MIT",
@@ -10,8 +16,11 @@
     "openzeppelin-solidity": "^2.0.0"
   },
   "devDependencies": {
+    "chai": "^4.2.0",
+    "chai-bignumber": "^3.0.0",
     "dotenv": "^6.1.0",
-    "ganache-cli": "^6.2.1",
+    "ethers": "^4.0.13",
+    "ganache-cli": "^6.2.3",
     "truffle": "^4.1.14",
     "truffle-hdwallet-provider": "^0.0.6"
   }
