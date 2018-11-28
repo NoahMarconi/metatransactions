@@ -26,17 +26,17 @@ contract MetaTxToken is ERC20Mintable, ERC20Detailed {
   constructor (string name, string symbol, uint8 decimals) ERC20Detailed(name, symbol, decimals) public {}
 
   /**
-  * @dev Total number of tokens in existence
-  */
+   * @dev Total number of tokens in existence
+   */
   function totalSupply() public view returns (uint256) {
     return _totalSupply;
   }
 
   /**
-  * @dev Gets the balance of the specified address.
-  * @param owner The address to query the balance of.
-  * @return An uint256 representing the amount owned by the passed address.
-  */
+   * @dev Gets the balance of the specified address.
+   * @param owner The address to query the balance of.
+   * @return An uint256 representing the amount owned by the passed address.
+   */
   function balanceOf(address owner) public view returns (uint256) {
     return _balances[owner];
   }
@@ -59,10 +59,10 @@ contract MetaTxToken is ERC20Mintable, ERC20Detailed {
   }
 
   /**
-  * @dev Transfer token for a specified address
-  * @param to The address to transfer to.
-  * @param value The amount to be transferred.
-  */
+   * @dev Transfer token for a specified address
+   * @param to The address to transfer to.
+   * @param value The amount to be transferred.
+   */
   function transfer(address to, uint256 value) public returns (bool) {
     _transfer(msg.sender, to, value);
     return true;
@@ -85,35 +85,54 @@ contract MetaTxToken is ERC20Mintable, ERC20Detailed {
     return true;
   }
 
-  function payloadToSign(address sender, address spender, uint256 value, uint256 nonce) public returns (bytes32 payload) {
+  function payloadToSign(
+    address sender,
+    uint256 value,
+    address spender,
+    uint256 nonce
+  ) public 
+    view
+    returns (bytes32 payload)
+  {
     return ECDSA.toEthSignedMessageHash(
-      keccak256(abi.encodePacked(sender, spender, value, nonce))
+      keccak256(abi.encodePacked(sender, address(this), value, spender, nonce))
     );
   }
 
-  function getNonce(address sender) public returns (uint256) {
+  function getNonce(address sender) public view returns (uint256) {
     return _nonces[sender];
   }
 
-  function verifyApproval(address sender, bytes32 payload, bytes signature) returns (bool) {
-    address recoveredAddress = ECDSA.recover(ECDSA.toEthSignedMessageHash(payload), signature);
+  function verifyApproval(
+    address sender,
+    bytes32 payload,
+    bytes signature
+  ) public
+    pure
+    returns (bool)
+  {
+    address recoveredAddress = ECDSA.recover(
+      ECDSA.toEthSignedMessageHash(payload),
+      signature
+    );
+
     return recoveredAddress == sender;
   }
 
   function metapprove(
     address sender,
-    address spender,
     uint256 value,
+    address spender,
     uint256 nonce,
     bytes signature)
   public returns (bool success) {
 
     // Verify and increment nonce.
     require(getNonce(sender) == nonce);
-    _nonces[sender].add(1);
+    _nonces[sender] = _nonces[sender].add(1);
     
     // Verify signature.
-    bytes32 payload = payloadToSign(sender, spender, value, nonce);
+    bytes32 payload = payloadToSign(sender, value, spender, nonce);
     require(verifyApproval(sender, payload, signature));
 
     // Standard approve.

@@ -32,18 +32,21 @@ contract('MetaTxToken', function ([_, owner, recipient, anotherAccount]) {
     });
 
     describe('metapprove', function () {
-        it('approves transfer based on signature', async function () {
+        it('approves transfer based on signature and increments nonce', async function () {
             const approveAmount = 100000;
             const nonce = await this.token.getNonce.call(recipient);
-            const toSign = await this.token.payloadToSign.call(recipient, owner, approveAmount, nonce);
+            const toSign = await this.token.payloadToSign.call(recipient, approveAmount, owner, nonce);
             
             // Note (ganache auto-applies "Ethereum Signed Message" prefix).
             const signature = await web3.eth.sign(recipient, toSign);
             
-            await this.token.metapprove(recipient, owner, approveAmount, nonce, signature, { from: _ });
+            await this.token.metapprove(recipient, approveAmount, owner, nonce, signature, { from: _ });
 
             const newAllowance = await this.token.allowance.call(recipient, owner);
             newAllowance.toNumber().should.be.equal(approveAmount);
+
+            const newNonce = await this.token.getNonce.call(recipient);
+            newNonce.toNumber().should.be.equal(nonce.toNumber() + 1);
         });
     });
 });
