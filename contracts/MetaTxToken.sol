@@ -95,7 +95,13 @@ contract MetaTxToken is ERC20Mintable, ERC20Detailed {
     returns (bytes32 payload)
   {
     return ECDSA.toEthSignedMessageHash(
-      keccak256(abi.encodePacked(sender, address(this), value, spender, nonce))
+      keccak256(abi.encodePacked(
+        sender,         // Token Owner.
+        address(this),  // Token address (replay protection).
+        value,          // Number of tokens.
+        spender,        // Address being approved to spend.
+        nonce           // Local sender specific nonce (replay protection).
+      ))
     );
   }
 
@@ -124,8 +130,8 @@ contract MetaTxToken is ERC20Mintable, ERC20Detailed {
     uint256 value,
     address spender,
     uint256 nonce,
-    bytes signature)
-  public returns (bool success) {
+    bytes signature
+  ) public returns (bool success) {
 
     // Verify and increment nonce.
     require(getNonce(sender) == nonce);
